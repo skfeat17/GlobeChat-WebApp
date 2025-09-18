@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { useNavigate } from "react-router-dom"
 
 export default function LandingPage() {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">
       {/* Navbar */}
@@ -11,7 +13,7 @@ export default function LandingPage() {
         <h1 className="text-xl sm:text-2xl font-bold text-black-700">GlobeChat</h1>
         </div>
         <nav className="space-x-2 sm:space-x-4">
-          <Button variant="ghost" size="sm">Login</Button>
+          <Button variant="ghost" size="sm" onClick={()=>navigate("/login")}>Login</Button>
         </nav>
       </header>
 
@@ -31,7 +33,7 @@ export default function LandingPage() {
             all in one app designed for speed, fun, and privacy.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-            <Button size="lg">Start Chatting</Button>
+            <Button onClick={()=>navigate("/register")} size="lg">Start Chatting</Button>
           </div>
           <p className="mt-4 text-xs sm:text-sm text-gray-500">
             ✅ Free • 🔒 Secure • 🌍 Global
@@ -80,7 +82,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="px-4 sm:px-8 py-12 bg-white">
+      {/* <section className="px-4 sm:px-8 py-12 bg-white">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           <div>
             <h3 className="text-3xl sm:text-5xl font-bold text-blue-600">50K+</h3>
@@ -95,7 +97,7 @@ export default function LandingPage() {
             <p className="mt-2 text-gray-600 text-sm sm:text-base">Messages Sent</p>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Footer */}
       <footer className="px-4 py-6 text-center text-gray-500 text-xs sm:text-sm border-t">

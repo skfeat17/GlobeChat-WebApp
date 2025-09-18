@@ -37,11 +37,12 @@ export default function ChatScreen() {
   const markAsRead = async () => {
     if (!accessToken || !chatUser?._id) return;
     try {
-      await axios.patch(
+    await axios.patch(
         `https://globe-chat-api.vercel.app/api/v1/message/chat/${chatUser._id}/read`,
         {},
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
+   
     } catch (err) {
       console.error("Mark as read failed:", err);
     }
@@ -214,8 +215,8 @@ function timeAgo(ts) {
   return (
     <div className="flex flex-col h-screen max-w-md mx-auto bg-background border-x border-border">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-border sticky top-0 z-10 bg-background">
-        <Button variant="ghost" size="icon">
+      <div className="flex items-center gap-3 p-4 border-b border-border sticky top-0 z-10 bg-background mb-13">
+        <Button onClick={()=>navigate("/menu/inbox")} variant="ghost" size="icon">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         {loading ? (
@@ -245,6 +246,12 @@ function timeAgo(ts) {
   {loading ? (
     <>
       <Skeleton className="h-12 w-2/3 rounded-2xl" />
+      <Skeleton className="h-12 w-2/3 rounded-2xl self-end" />
+            <Skeleton className="h-12 w-2/3 rounded-2xl" />
+      <Skeleton className="h-12 w-2/3 rounded-2xl self-end" />
+            <Skeleton className="h-12 w-2/3 rounded-2xl" />
+      <Skeleton className="h-12 w-2/3 rounded-2xl self-end" />
+            <Skeleton className="h-12 w-2/3 rounded-2xl" />
       <Skeleton className="h-12 w-2/3 rounded-2xl self-end" />
     </>
   ) : (

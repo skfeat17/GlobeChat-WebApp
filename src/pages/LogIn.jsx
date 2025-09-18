@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import axios from "axios"
-
+import { useNavigate, Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -24,7 +24,7 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
-
+  const navigate = useNavigate()
   const form = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -32,56 +32,57 @@ export default function LoginPage() {
       password: "",
     },
   })
-async function onSubmit(values) {
-  try {
-    setLoading(true)
 
-    // Determine if identifier is an email
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.identifier)
+  async function onSubmit(values) {
+    try {
+      setLoading(true)
 
+      // Determine if identifier is an email
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.identifier)
 
-    // Prepare payload according to backend expectation
-    const payload = isEmail
-      ? { email: values.identifier, password: values.password }
-      : { username: values.identifier, password: values.password }
+      // Prepare payload according to backend expectation
+      const payload = isEmail
+        ? { email: values.identifier, password: values.password }
+        : { username: values.identifier, password: values.password }
 
-    const response = await axios.post(
-      "https://globe-chat-api.vercel.app/api/v1/users/login",
-      payload,
-      {
-        withCredentials: true, // ✅ send cookies
+      const response = await axios.post(
+        "https://globe-chat-api.vercel.app/api/v1/users/login",
+        payload,
+        {
+          withCredentials: true,
+        }
+      )
+
+      const { accessToken, refreshToken } = response.data.data
+      localStorage.setItem("accessToken", accessToken)
+      localStorage.setItem("refreshToken", refreshToken)
+      localStorage.setItem("user", JSON.stringify(response.data.data.user))
+
+      navigate("/menu/inbox")
+      form.reset()
+    } catch (error) {
+      if (error.response && error.response.data) {
+        const message = error.response.data.message
+        if (message.toLowerCase().includes("user")) {
+          form.setError("identifier", { type: "server", message })
+        } else if (message.toLowerCase().includes("credentials")) {
+          form.setError("password", { type: "server", message })
+        } else {
+          alert(message)
+        }
       }
-    )
-    // Assuming your API returns { accessToken, refreshToken }
-    const { accessToken, refreshToken } = response.data.data
-    console.log(response.data.data.user)
-    // Store tokens in localStorage
-    localStorage.setItem("accessToken", accessToken)
-    localStorage.setItem("refreshToken", refreshToken)
-    localStorage.setItem("user", JSON.stringify(response.data.data.user))
-    alert("Logged in successfully!")
-    form.reset()
-  } catch (error) {
-    if (error.response && error.response.data) {
-      const message = error.response.data.message
-      if (message.toLowerCase().includes("user")) {
-        form.setError("identifier", { type: "server", message })
-      } else if (message.toLowerCase().includes("credentials")) {
-        form.setError("password", { type: "server", message })
-      } else {
-        alert(message)
-      }
+    } finally {
+      setLoading(false)
     }
-  } finally {
-    setLoading(false)
   }
-}
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-center text-2xl font-bold">Login to GlobeChat</CardTitle>
+          <CardTitle className="text-center text-2xl font-bold">
+            Login to GlobeChat
+          </CardTitle>
           <p className="text-gray-500 text-sm text-center mt-2">
             Enter your username or email and password to continue
           </p>
@@ -112,7 +113,11 @@ async function onSubmit(values) {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Enter your password" {...field} />
+                      <Input
+                        type="password"
+                        placeholder="Enter your password"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -125,6 +130,14 @@ async function onSubmit(values) {
               </Button>
             </form>
           </Form>
+
+          {/* Don't have an account */}
+          <p className="text-sm text-center mt-4 text-gray-600">
+            Don’t have an account?{" "}
+            <Link to="/register" className="text-blue-600 hover:underline">
+              Register
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </div>
