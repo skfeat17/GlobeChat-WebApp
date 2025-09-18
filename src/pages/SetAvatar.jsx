@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import toast, { Toaster } from "react-hot-toast"
-
+import { useNavigate } from "react-router-dom"
 export default function AvatarUploadPage() {
   const user = JSON.parse(localStorage.getItem("user") || "{}")
   const firstName = user?.name?.split(" ")[0] || "User"
-
+const navigate = useNavigate();
   const [avatarFile, setAvatarFile] = useState(null)
   const [preview, setPreview] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -64,6 +64,7 @@ export default function AvatarUploadPage() {
       toast.success("Your avatar has been uploaded successfully!", {
         position: window.innerWidth < 768 ? "top-center" : "top-right",
       })
+      navigate('/menu/inbox')
     } catch (err) {
       console.error(err)
       toast.error(err.response?.data?.message || "Failed to upload avatar", {
