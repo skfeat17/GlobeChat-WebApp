@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+
+
+//   const fd = localStorage.getItem("frnd");
+  // fd?friendId=fd:friendId=friendId;
