@@ -63,7 +63,7 @@ async function onSubmit(values) {
     localStorage.setItem("accessToken", accessToken)
     localStorage.setItem("refreshToken", refreshToken)
     localStorage.setItem("user", JSON.stringify(response.data.user))
-   navigate("/menu/inbox")
+   navigate("/set-avatar")
     
     form.reset()
   } catch (error) {
