@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import axios from "axios"
-
+import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useNavigate } from "react-router-dom"
 
 // Validation schema
 const formSchema = z.object({
@@ -33,6 +34,7 @@ const formSchema = z.object({
 })
 
 export default function RegisterPage() {
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
 
   const form = useForm({
@@ -61,8 +63,8 @@ async function onSubmit(values) {
     localStorage.setItem("accessToken", accessToken)
     localStorage.setItem("refreshToken", refreshToken)
     localStorage.setItem("user", JSON.stringify(response.data.user))
-
-    alert("Account created successfully!")
+   navigate("/menu/inbox")
+    
     form.reset()
   } catch (error) {
     if (error.response && error.response.data) {
@@ -184,6 +186,13 @@ async function onSubmit(values) {
               </Button>
             </form>
           </Form>
+   
+                    <p className="text-sm text-center mt-4 text-gray-600">
+                      Already have an account?{" "}
+                      <Link to="/login" className="text-blue-600 hover:underline">
+                        Login
+                      </Link>
+                    </p>
         </CardContent>
       </Card>
     </div>

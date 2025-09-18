@@ -80,8 +80,12 @@ export default function MyProfile() {
         ...prev,
         avatar: res?.data?.data?.avatar || prev.avatar,
       }));
+      const user = localStorage.getItem("user");
+      if (user) {
+        const updatedUser = { ...JSON.parse(user), avatar: res?.data?.data?.avatar };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
 
-      toast.success("Profile picture updated!");
       setSelectedFile(null);
       setPreview(null);
       setOpen(false);
@@ -225,7 +229,7 @@ export default function MyProfile() {
               );
               localStorage.removeItem("accessToken");
               toast.success("Logged out successfully");
-              window.location.href = "/login";
+              window.location.href = "/";
             } catch (err) {
               toast.error(err?.response?.data?.message || "Logout failed");
             }

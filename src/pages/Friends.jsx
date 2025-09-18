@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
@@ -13,8 +12,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import toast, { Toaster } from "react-hot-toast";
-import { UserMinus } from "lucide-react";
-import BottomNav from "@/components/ui/BottomNav";
+import { UserMinus, MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function FriendsPage() {
   const [friends, setFriends] = useState([]);
@@ -23,6 +22,7 @@ export default function FriendsPage() {
 
   const accessToken = localStorage.getItem("accessToken");
   const baseurl = "https://globe-chat-api.vercel.app/api/v1";
+  const navigate = useNavigate();
 
   // ✅ Fetch friends
   useEffect(() => {
@@ -68,13 +68,11 @@ export default function FriendsPage() {
 
       {loading ? (
         <div className="space-y-3">
-          <Skeleton className="h-12 w-full rounded-lg" />
-          <Skeleton className="h-12 w-full rounded-lg" />
-                 <Skeleton className="h-12 w-full rounded-lg" />
-          <Skeleton className="h-12 w-full rounded-lg" />
-                 <Skeleton className="h-12 w-full rounded-lg" />
-          <Skeleton className="h-12 w-full rounded-lg" />
-                 <Skeleton className="h-12 w-full rounded-lg" />
+          {Array(6)
+            .fill(null)
+            .map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full rounded-lg" />
+            ))}
         </div>
       ) : friends.length === 0 ? (
         <p className="text-muted-foreground">No friends yet</p>
@@ -92,9 +90,21 @@ export default function FriendsPage() {
                 </Avatar>
                 <p className="font-medium">{friend.name}</p>
               </div>
-     
-              <UserMinus className="w-4 h-4 text-red-500"     
-                onClick={() => setSelectedFriend(friend)}/>
+
+              <div className="flex items-center gap-3">
+           
+                {/* ✅ Remove Icon */}
+                <UserMinus
+                  className="w-5 h-5 text-red-500 cursor-pointer"
+                  onClick={() => setSelectedFriend(friend)}
+                />
+                     {/* ✅ Chat Icon */}
+                <MessageCircle
+                  className="w-5 h-5 text-blue-500 cursor-pointer"
+                  onClick={() => navigate(`/chat/${friend._id}`)}
+                />
+
+              </div>
             </div>
           ))}
         </div>
@@ -114,7 +124,8 @@ export default function FriendsPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive"
+            <AlertDialogAction
+              variant="destructive"
               onClick={() => handleRemoveFriend(selectedFriend)}
             >
               Yes, Remove
