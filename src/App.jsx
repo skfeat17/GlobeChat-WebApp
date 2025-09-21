@@ -1,5 +1,5 @@
-import React,{useEffect} from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"; // ✅ added Navigate
 import LandingPage from "./pages/LandingPage";
 import Register from "./pages/Register";
 import LoginPage from "./pages/LogIn";
@@ -14,28 +14,34 @@ import { FriendsProvider } from "./context/FriendsContext";
 import axios from "axios";
 import * as PusherPushNotifications from "@pusher/push-notifications-web";
 
-
 function App() {
+  // 🔹 Pusher Beams setup
   useEffect(() => {
-    const userId = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user"))._id : null;
+    const userId = localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user"))._id
+      : null;
+
+    if (!userId) return;
+
     const beamsClient = new PusherPushNotifications.Client({
-      instanceId: "e7c78238-d563-465f-ba04-ef4d1157e744", // from Pusher dashboard
+      instanceId: "e7c78238-d563-465f-ba04-ef4d1157e744",
     });
 
-    beamsClient.start()
-      .then(() => beamsClient.addDeviceInterest(`chat-${userId}`) // 🔹 subscribe to topic
-      .then(() => console.log("Successfully registered and subscribed!"))
-      .catch(console.error))
+    beamsClient
+      .start()
+      .then(() =>
+        beamsClient
+          .addDeviceInterest(`chat-${userId}`)
+          .then(() => console.log("Successfully registered and subscribed!"))
+          .catch(console.error)
+      );
   }, []);
 
-
-
-
-useEffect(() => {
+  // 🔹 Online/offline status sync
+  useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) return;
 
-    // 🔹 Helper to call backend
     const markOnline = async () => {
       try {
         await axios.post(
@@ -60,10 +66,8 @@ useEffect(() => {
       }
     };
 
-    // 🔹 Mark online immediately
     markOnline();
 
-    // 🔹 When tab is hidden → offline, visible → online
     const handleVisibility = () => {
       if (document.visibilityState === "hidden") {
         markOffline();
@@ -72,7 +76,6 @@ useEffect(() => {
       }
     };
 
-    // 🔹 When browser/tab is closed → offline
     const handleUnload = () => {
       navigator.sendBeacon(
         "https://globe-chat-api.vercel.app/api/v1/users/mark-offline",
@@ -86,33 +89,30 @@ useEffect(() => {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("beforeunload", handleUnload);
-      markOffline(); // cleanup just in case
+      markOffline();
     };
   }, []);
 
-
-
-
-
-
-
-
-
-
-
-
+  // 🔹 Auth check for redirect
+  const accessToken = localStorage.getItem("accessToken");
+  const user = localStorage.getItem("user");
 
   return (
     <Router>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<LandingPage />} />
+        <Route
+          path="/"
+          element={
+            accessToken && user ? <Navigate to="/menu/inbox" replace /> : <LandingPage />
+          }
+        />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/set-avatar" element={<AvatarUploadPage />} />
         <Route path="/chat/:id" element={<ChatScreen />} />
 
-        {/* Protected routes (chat area with bottom nav) */}
+        {/* Protected routes */}
         <Route
           path="/menu"
           element={

@@ -261,7 +261,7 @@ useEffect(()=>{
 
   // ---------------- Render ----------------
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-background border-x border-border">
+  <div className="flex flex-col h-screen max-w-md mx-auto bg-background border-x border-border overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-border sticky top-0 z-10 bg-background mb-13">
         <Button onClick={() => navigate("/menu/inbox")} variant="ghost" size="icon">
@@ -290,7 +290,7 @@ useEffect(()=>{
       <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 flex flex-col space-y-4 scrollbar-none"
+        className="flex-1 overflow-y-auto overflow-x-hidden p-4 flex flex-col space-y-4 scrollbar-none"
       >
         {loading ? (
           <>

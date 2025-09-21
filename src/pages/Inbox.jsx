@@ -86,21 +86,20 @@ export default function Inbox() {
     friends.some((f) => f._id === chat.participant._id)
   );
 
-  const handleChatClick = async (participantId) => {
+const handleChatClick = (participantId) => {
+  navigate(`/chat/${participantId}`);
 
-    try {
-      navigate(`/chat/${participantId}`);
-      await axios.patch(
-        `https://globe-chat-api.vercel.app/api/v1/chat/${participantId}/read`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchData(); // refresh after marking read
+  setTimeout(() => {
+    axios.patch(
+      `https://globe-chat-api.vercel.app/api/v1/message/chat/${participantId}/read`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+      .then(fetchData)
+      .catch((err) => console.error("Failed to mark as read:", err));
+  }, 0);
+};
 
-    } catch (err) {
-      console.error("Failed to mark as read:", err);
-    }
-  };
 
   return (
     <div className="flex flex-col h-screen">
