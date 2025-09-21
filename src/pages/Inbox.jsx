@@ -1,52 +1,51 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { useOutletContext, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Inbox() {
   const navigate = useNavigate();
-
   const [chats, setChats] = useState([]);
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const token = localStorage.getItem("accessToken");
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-const activeFriends = friends.filter((f) => {
-  return f.isOnline;
-});
+  const fetchData = useCallback(async () => {
+    try {
+      if (!token) throw new Error("No access token");
 
-  // Fetch friends & inbox
+      const [inboxRes, friendsRes] = await Promise.all([
+        axios.get("https://globe-chat-api.vercel.app/api/v1/message/inbox", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get("https://globe-chat-api.vercel.app/api/v1/users/friends", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      setChats(inboxRes.data.data || []);
+      setFriends(friendsRes.data.data || []);
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.response?.data?.message || err.message || "Failed to load data"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  // Polling every 5s
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) throw new Error("No access token");
-
-        const [inboxRes, friendsRes] = await Promise.all([
-          axios.get("https://globe-chat-api.vercel.app/api/v1/message/inbox", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get("https://globe-chat-api.vercel.app/api/v1/users/friends", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-
-        setChats(inboxRes.data.data || []);
-        setFriends(friendsRes.data.data || []);
-      } catch (err) {
-        console.error(err);
-        setError(
-          err.response?.data?.message || err.message || "Failed to load data"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
-  }, []);
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   if (loading) {
     return (
@@ -82,7 +81,26 @@ const activeFriends = friends.filter((f) => {
       </div>
     );
 
-  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const activeFriends = friends.filter((f) => f.isOnline);
+  const friendsChat = chats.filter((chat) =>
+    friends.some((f) => f._id === chat.participant._id)
+  );
+
+  const handleChatClick = async (participantId) => {
+
+    try {
+      navigate(`/chat/${participantId}`);
+      await axios.patch(
+        `https://globe-chat-api.vercel.app/api/v1/chat/${participantId}/read`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchData(); // refresh after marking read
+
+    } catch (err) {
+      console.error("Failed to mark as read:", err);
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen">
@@ -92,12 +110,14 @@ const activeFriends = friends.filter((f) => {
       {/* Online friends bar */}
       <div className="px-4 py-2 my-3 overflow-x-auto">
         <div className="flex space-x-4">
-          {/* Current user */}
           {currentUser._id && (
             <div className="flex flex-col items-center">
               <div className="relative">
                 <Avatar className="w-14 h-14">
-                  <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
+                  <AvatarImage
+                    src={currentUser.avatar}
+                    alt={currentUser.name}
+                  />
                   <AvatarFallback>
                     {currentUser.name?.charAt(0) || "Y"}
                   </AvatarFallback>
@@ -108,13 +128,11 @@ const activeFriends = friends.filter((f) => {
             </div>
           )}
 
-          {/* Friends with isOnline check */}
-       
           {activeFriends?.map((friend) => (
             <div
               key={friend._id}
               className="flex flex-col items-center cursor-pointer"
-              onClick={() => navigate(`/chat/${friend._id}`)}
+              onClick={() => handleChatClick(friend._id)}
             >
               <div className="relative">
                 <Avatar className="w-14 h-14">
@@ -137,18 +155,32 @@ const activeFriends = friends.filter((f) => {
       {/* Chat list */}
       <div className="flex-1 overflow-y-auto p-2 space-y-2 pb-16">
         <h2 className="text-xl font-bold mb-2">Recent Chats</h2>
-        {chats.map((chat) => {
+        {friendsChat.map((chat) => {
           const participant = chat.participant;
+          const lastMsg = chat.lastMessage;
+
+          const isSenderMe = lastMsg.senderId === currentUser._id;
+          console.table([lastMsg, isSenderMe]);
+          const isUnread = !lastMsg.isRead && !isSenderMe;
+
+          // First name only
+          const firstName = participant.name?.split(" ")[0] || participant.name;
+
+          // Prefix
+          const prefix = isSenderMe
+            ? "You: "
+            : `${firstName}: `;
+
           return (
             <Card
               key={chat._id}
               className="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-              onClick={() => navigate(`/chat/${participant._id}`)}
+              onClick={() => handleChatClick(participant._id)}
             >
               <div className="relative">
                 <Avatar>
                   <AvatarImage src={participant.avatar} alt={participant.name} />
-                  <AvatarFallback>{participant.name?.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>{firstName?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <span
                   className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${participant.isOnline ? "bg-green-500" : "bg-gray-400"
@@ -158,17 +190,23 @@ const activeFriends = friends.filter((f) => {
               <div className="flex-1">
                 <div className="flex justify-between items-center">
                   <h3 className="font-semibold truncate max-w-[200px]">
-                    {participant.name}
+                    {firstName}
                   </h3>
                   <span className="text-xs text-gray-500">
-                    {new Date(chat.lastMessage.createdAt).toLocaleTimeString([], {
+                    {new Date(lastMsg.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                  {chat.lastMessage.message}
+                <p
+                  className={`text-sm truncate ${isUnread
+                      ? "font-bold text-black"
+                      : "text-gray-600 dark:text-gray-400"
+                    }`}
+                >
+                  {prefix}
+                  {lastMsg.message}
                 </p>
               </div>
             </Card>

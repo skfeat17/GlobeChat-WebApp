@@ -190,10 +190,7 @@ export default function DiscoverPage() {
                   )}
 
                   {/* Start chat */}
-                  <MessageSquare
-                    className="w-5 h-5 text-blue-500 cursor-pointer"
-                    onClick={() => handleStartChat(user)}
-                  />
+                  
                 </div>
               </div>
             );

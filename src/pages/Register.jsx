@@ -62,8 +62,11 @@ async function onSubmit(values) {
     // Store tokens in localStorage
     localStorage.setItem("accessToken", accessToken)
     localStorage.setItem("refreshToken", refreshToken)
-    localStorage.setItem("user", JSON.stringify(response.data.user))
-   navigate("/menu/inbox")
+    const userData = response.data.data.user;
+    console.log("User data:", userData);
+    // Store user data in localStorage    
+    localStorage.setItem("user", JSON.stringify(userData))
+   navigate("/set-avatar")
     
     form.reset()
   } catch (error) {

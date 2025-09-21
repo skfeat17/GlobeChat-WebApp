@@ -12,8 +12,22 @@ import MyProfile from "./pages/Profile";
 import ChatScreen from "./pages/ChatWindow";
 import { FriendsProvider } from "./context/FriendsContext";
 import axios from "axios";
+import * as PusherPushNotifications from "@pusher/push-notifications-web";
+
 
 function App() {
+  useEffect(() => {
+    const userId = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user"))._id : null;
+    const beamsClient = new PusherPushNotifications.Client({
+      instanceId: "e7c78238-d563-465f-ba04-ef4d1157e744", // from Pusher dashboard
+    });
+
+    beamsClient.start()
+      .then(() => beamsClient.addDeviceInterest(`chat-${userId}`) // 🔹 subscribe to topic
+      .then(() => console.log("Successfully registered and subscribed!"))
+      .catch(console.error))
+  }, []);
+
 
 
 
