@@ -61,9 +61,11 @@ const navigate = useNavigate();
       )
 
       setSuccess(true)
-      toast.success("Your avatar has been uploaded successfully!", {
-        position: window.innerWidth < 768 ? "top-center" : "top-right",
-      })
+toast.success("Your avatar has been uploaded successfully!", {
+  duration: 3000, // disappears after 3s
+  position: window.innerWidth < 768 ? "top-center" : "top-right",
+})
+
       navigate('/menu/inbox')
     } catch (err) {
       console.error(err)
