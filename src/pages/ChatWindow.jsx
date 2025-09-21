@@ -296,6 +296,11 @@ useEffect(()=>{
           <>
             <Skeleton className="h-12 w-2/3 rounded-2xl" />
             <Skeleton className="h-12 w-2/3 rounded-2xl self-end" />
+             <Skeleton className="h-12 w-2/3 rounded-2xl" />
+            <Skeleton className="h-12 w-2/3 rounded-2xl self-end" />
+             <Skeleton className="h-12 w-2/3 rounded-2xl" />
+            <Skeleton className="h-12 w-2/3 rounded-2xl self-end" />
+             <Skeleton className="h-12 w-2/3 rounded-2xl" />
           </>
         ) : (
           allMessages.map((msg, index) => {
