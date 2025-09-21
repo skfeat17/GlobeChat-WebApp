@@ -49,7 +49,7 @@ const navigate = useNavigate();
       const accessToken = localStorage.getItem("accessToken")
       if (!accessToken) throw new Error("User not authenticated")
 
-      await axios.put(
+     const res =  await axios.put(
         "https://globe-chat-api.vercel.app/api/v1/users/avatar",
         formData,
         {
@@ -59,12 +59,8 @@ const navigate = useNavigate();
           },
         }
       )
-
+      localStorage.setItem("user", JSON.stringify(res.data.data))
       setSuccess(true)
-toast.success("Your avatar has been uploaded successfully!", {
-  duration: 3000, // disappears after 3s
-  position: window.innerWidth < 768 ? "top-center" : "top-right",
-})
 
       navigate('/menu/inbox')
     } catch (err) {
