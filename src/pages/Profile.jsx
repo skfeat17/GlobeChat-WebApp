@@ -19,8 +19,9 @@ import { Loader2, Edit, LogOut } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 import BottomNav from "@/components/ui/BottomNav";
 import { Skeleton } from "@/components/ui/skeleton"; // ✅ import skeleton
-
+import { useNavigate } from "react-router-dom";
 export default function MyProfile() {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -221,30 +222,15 @@ export default function MyProfile() {
         <div
           className="bg-white rounded-lg shadow-sm px-4 py-3 flex justify-center items-center cursor-pointer hover:bg-red-50 transition"
           onClick={() => {
-  // ✅ Navigate instantly
-  window.location.href = "/";
+            // ✅ Navigate instantly
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("user");
+            navigate("/login");
 
-  // ✅ Fire-and-forget API calls (no await)
-  axios.post(
-    "https://globe-chat-api.vercel.app/api/v1/users/mark-offline",
-    {},
-    { headers: { Authorization: `Bearer ${accessToken}` } }
-  ).catch((err) => console.error("markOffline failed:", err));
 
-  axios.post(
-    `https://globe-chat-api.vercel.app/api/v1/users/logout`,
-    {},
-    { headers: { Authorization: `Bearer ${accessToken}` } }
-  )
-    .then(() => {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("user");
-      toast.success("Logged out successfully");
-    })
-    .catch((err) => {
-      toast.error(err?.response?.data?.message || "Logout failed");
-    });
-}}
+
+
+          }}
 
         >
           <LogOut className="w-4 h-4 text-red-600 mr-2" />
