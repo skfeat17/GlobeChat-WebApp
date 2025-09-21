@@ -47,12 +47,8 @@ export default function LoginPage() {
 
       const response = await axios.post(
         "https://globe-chat-api.vercel.app/api/v1/users/login",
-        payload,
-        {
-          withCredentials: true,
-        }
+        payload
       )
-
       const { accessToken, refreshToken } = response.data.data
       localStorage.setItem("accessToken", accessToken)
       localStorage.setItem("refreshToken", refreshToken)

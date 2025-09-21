@@ -221,7 +221,18 @@ export default function MyProfile() {
         <div
           className="bg-white rounded-lg shadow-sm px-4 py-3 flex justify-center items-center cursor-pointer hover:bg-red-50 transition"
           onClick={async () => {
+
+
             try {
+        await axios.post(
+          "https://globe-chat-api.vercel.app/api/v1/users/mark-offline",
+          {},
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+      } catch (err) {
+        console.error("markOffline failed:", err);
+      }
+              try {
               await axios.post(
                 `${baseurl}/users/logout`,
                 {},
@@ -233,6 +244,9 @@ export default function MyProfile() {
             } catch (err) {
               toast.error(err?.response?.data?.message || "Logout failed");
             }
+
+
+
           }}
         >
           <LogOut className="w-4 h-4 text-red-600 mr-2" />
