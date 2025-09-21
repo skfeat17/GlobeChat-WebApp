@@ -160,7 +160,6 @@ export default function Inbox() {
           const lastMsg = chat.lastMessage;
 
           const isSenderMe = lastMsg.senderId === currentUser._id;
-          console.table([lastMsg, isSenderMe]);
           const isUnread = !lastMsg.isRead && !isSenderMe;
 
           // First name only
