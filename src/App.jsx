@@ -111,7 +111,12 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/set-avatar" element={<AvatarUploadPage />} />
         <Route path="/chat/:id" element={<ChatScreen />} />
-
+               <Route
+          path="*"
+          element={
+            accessToken && user ? <Navigate to="/menu/inbox" replace /> : <LandingPage />
+          }
+        />
         {/* Protected routes */}
         <Route
           path="/menu"
